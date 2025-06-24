@@ -69,7 +69,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'https://jayabharathistore.xyz',
-  'https://www.jayabharathistore.xyz'
+  'https://www.jayabharathistore.xyz',
+  'https://your-netlify-site.netlify.app',
+  'https://your-custom-domain.com',
 ];
 
 app.use((req, res, next) => {
@@ -78,18 +80,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) {
-      console.log('No origin provided, allowing request');
-      return callback(null, true);
-    }
-    if (allowedOrigins.includes(origin)) {
-      console.log('Origin allowed:', origin);
-      return callback(null, true);
-    }
-    console.log('Origin blocked:', origin);
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

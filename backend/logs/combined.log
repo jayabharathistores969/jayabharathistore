@@ -307,3 +307,5 @@
 {"level":"info","message":"Server running on port 5001 in development mode"}
 {"level":"info","message":"Connected to MongoDB"}
 {"level":"info","message":"Server running on port 5001 in development mode"}
+{"level":"info","message":"Connected to MongoDB"}
+{"level":"info","message":"Server running on port 5001 in development mode"}
