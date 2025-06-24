@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  REACT_APP_API_URL = "https://jayabharathistore-kwt7w9f2v-yogeshs-projects-6544e7db.vercel.app/api"
+  REACT_APP_API_URL = "https://backend-l4tfs5l2o-yogeshs-projects-6544e7db.vercel.app"
 
 [[redirects]]
   from = "/*"
@@ -14,4 +14,10 @@
 [dev]
   command = "npm start"
   port = 3000
-  publish = "public" 
+  publish = "public"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://backend-wheat-omega.vercel.app/api/:splat"
+  status = 200
+  force = true 

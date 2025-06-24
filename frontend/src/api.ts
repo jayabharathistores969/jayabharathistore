@@ -2,7 +2,7 @@ import axios from 'axios';
 import { config } from './config';
 
 // Force the correct backend URL (latest deployment)
-const API_BASE_URL = 'https://backend-l4tfs5l2o-yogeshs-projects-6544e7db.vercel.app/api';
+export const API_BASE_URL = "https://backend-wheat-omega.vercel.app/api";
 
 console.log('API Base URL:', API_BASE_URL); // Debug log
 
