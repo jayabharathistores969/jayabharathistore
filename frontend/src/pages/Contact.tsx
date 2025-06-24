@@ -26,7 +26,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation } from '@tanstack/react-query';
-import config from '../config';
+import { config } from '../config';
 
 const Contact: React.FC = () => {
   const { user } = useAuth();

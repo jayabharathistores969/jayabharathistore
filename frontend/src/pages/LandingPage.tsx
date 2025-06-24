@@ -85,18 +85,40 @@ const LandingPage: React.FC = () => {
   }>({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
+    // Fetch products from the correct backend endpoint
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        console.log('Fetching products from:', api.defaults.baseURL + '/products');
         const response = await api.get('/products');
+        console.log('Products response:', response.data);
         setProducts(response.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch products', error);
+        console.error('Error details:', {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          config: error.config
+        });
+        
+        let errorMessage = 'Failed to load products.';
+        if (error.response?.status === 401) {
+          errorMessage = 'Authentication required to load products.';
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Products endpoint not found.';
+        } else if (error.response?.status === 500) {
+          errorMessage = 'Server error while loading products.';
+        } else if (error.code === 'ERR_NETWORK') {
+          errorMessage = 'Network error - please check your connection.';
+        }
+        
         setSnackbar({
           open: true,
-          message: 'Failed to load products.',
+          message: errorMessage,
           severity: 'error',
         });
+        // No fallback products, only show error
       } finally {
         setLoading(false);
       }

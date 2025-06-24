@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  REACT_APP_API_URL = "https://backend-rivb9gvi2-yogeshs-projects-6544e7db.vercel.app/api"
+  REACT_APP_API_URL = "https://jayabharathistore-kwt7w9f2v-yogeshs-projects-6544e7db.vercel.app/api"
 
 [[redirects]]
   from = "/*"

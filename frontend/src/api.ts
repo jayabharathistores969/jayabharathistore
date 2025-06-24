@@ -1,12 +1,40 @@
 import axios from 'axios';
 import { config } from './config';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || config.API_URL;
+// Force the correct backend URL - OLD BACKEND
+const API_BASE_URL = 'https://backend-6tpf572fo-yogeshs-projects-6544e7db.vercel.app/api';
+
+console.log('API Base URL:', API_BASE_URL); // Debug log
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: config.API_TIMEOUT || 10000,
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log('Making request to:', config.url);
+    return config;
+  },
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+  (response) => {
+    console.log('Response received:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('Response error:', error.response?.status, error.response?.data, error.config?.url);
+    return Promise.reject(error);
+  }
+);
 
 // Function to set the auth token on the API instance
 export const setAuthToken = (token: string | null) => {
