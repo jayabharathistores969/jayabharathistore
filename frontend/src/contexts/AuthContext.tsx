@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [logout]);
 
   useEffect(() => {
-    if (!user || !token) return;
+    if (!token) return;
     let interval: NodeJS.Timeout;
     let didLogout = false;
 
@@ -152,7 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     interval = setInterval(checkActiveStatus, 30000); // Check every 30 seconds
 
     return () => clearInterval(interval);
-  }, [user, token, logout]);
+  }, [token, logout]);
 
   return (
     <AuthContext.Provider value={{ 

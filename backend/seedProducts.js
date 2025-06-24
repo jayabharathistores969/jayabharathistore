@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Product = require('./models/Product');
 const { ObjectId } = require('mongodb');
+require('dotenv').config({ path: './temp.env' });
 
 const products = [
   {
@@ -115,7 +116,7 @@ const products = [
   },
 ];
 
-mongoose.connect('mongodb://127.0.0.1:27017/Jayabharathi-stores', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(async () => {
     await Product.deleteMany({});
     await Product.insertMany(products);

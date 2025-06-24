@@ -456,52 +456,36 @@ const AdminDashboard: React.FC = () => {
           </Grid>
 
           {/* Recent Orders */}
-          <Grid item xs={12} lg={4}>
-            <Card sx={{ borderRadius: 4, mb: { xs: 2, lg: 4 } }}>
-              <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" fontWeight={600} color="text.primary">
-                    Recent Orders
-                  </Typography>
-                  <IconButton size="small" onClick={() => navigate('/admin/orders')}>
-                    <ViewIcon />
-                  </IconButton>
-                </Box>
-                {stats.recentOrders.length === 0 ? (
-                  <Alert severity="info" sx={{ borderRadius: 2 }}>
-                    No recent orders
-                  </Alert>
-                ) : (
-                  stats.recentOrders.map((order, index) => (
-                    <RecentOrderCard key={order._id || index} order={order} />
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+          {stats.recentOrders && stats.recentOrders.length > 0 && (
+            <Box>
+              <Typography variant="h6" fontWeight={600} mb={2}>
+                Recent Orders
+              </Typography>
+              <Grid container spacing={2}>
+                {stats.recentOrders.slice(0, 10).map((order, idx) => (
+                  <Grid item xs={12} sm={6} md={4} key={order._id || idx}>
+                    <RecentOrderCard order={order} />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
 
-          {/* Low Stock Alert */}
-          <Grid item xs={12} lg={4}>
-            <Card sx={{ borderRadius: 4, mb: { xs: 2, lg: 4 } }}>
-              <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" fontWeight={600} color="text.primary">
-                    Low Stock Alert
-                  </Typography>
-                  <Chip label={stats.lowStockProducts.length} color="warning" size="small" />
-                </Box>
-                {stats.lowStockProducts.length === 0 ? (
-                  <Alert severity="success" sx={{ borderRadius: 2 }}>
-                    All products are well stocked!
-                  </Alert>
-                ) : (
-                  stats.lowStockProducts.map((product, index) => (
-                    <LowStockCard key={product._id || index} product={product} />
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+          {/* Low Stock Products */}
+          {stats.lowStockProducts && stats.lowStockProducts.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h6" fontWeight={600} mb={2}>
+                Low Stock Products
+              </Typography>
+              <Grid container spacing={2}>
+                {stats.lowStockProducts.slice(0, 10).map((product, idx) => (
+                  <Grid item xs={12} sm={6} md={4} key={product._id || idx}>
+                    <LowStockCard product={product} />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
         </Grid>
       </Container>
     </Box>

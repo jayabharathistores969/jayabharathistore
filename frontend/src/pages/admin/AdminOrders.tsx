@@ -80,32 +80,35 @@ const AdminOrders: React.FC = () => {
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning' }>({ open: false, message: '', severity: 'success' });
   const [error, setError] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchOrders = useCallback(async () => {
     if (authLoading || !token) {
       if (!authLoading && !token) setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/orders');
-      setOrders(response.data);
+      const response = await api.get(`/admin/orders?page=${page}&limit=${pageSize}`);
+      setOrders(response.data.orders);
+      setTotalPages(response.data.pages);
       setStats({
-        total: response.data.length,
-        pending: response.data.filter((o: any) => o.status === 'pending').length,
-        delivered: response.data.filter((o: any) => o.status === 'delivered').length,
-        revenue: response.data.reduce((total: number, order: any) => total + order.totalAmount, 0)
+        total: response.data.total,
+        pending: response.data.orders.filter((o: any) => o.status === 'pending').length,
+        delivered: response.data.orders.filter((o: any) => o.status === 'delivered').length,
+        revenue: response.data.orders.reduce((total: number, order: any) => total + order.totalAmount, 0)
       });
-      setFilteredOrders(response.data);
+      setFilteredOrders(response.data.orders);
     } catch (err) {
       console.error('Failed to fetch orders:', err);
       setError('Failed to fetch orders. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [authLoading, token]);
+  }, [authLoading, token, page, pageSize]);
 
   useEffect(() => {
     fetchOrders();
@@ -505,6 +508,13 @@ const AdminOrders: React.FC = () => {
             </CardContent>
           </Card>
         </Container>
+
+        {/* Pagination controls */}
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+          <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
+          <Typography mx={2}>Page {page} of {totalPages}</Typography>
+          <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+        </Box>
       </Container>
 
       {/* Order Details Dialog */}

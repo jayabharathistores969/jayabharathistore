@@ -74,6 +74,9 @@ const AdminUsers: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [stats, setStats] = useState({
     total: 0,
@@ -87,25 +90,25 @@ const AdminUsers: React.FC = () => {
       if (!authLoading && !token) setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/admin/users');
-      setUsers(response.data);
+      const response = await api.get(`/admin/users?page=${page}&limit=${pageSize}`);
+      setUsers(response.data.users);
       setStats({
-        total: response.data.length,
-        active: response.data.filter((u: User) => !u.isBanned).length,
-        admins: response.data.filter((u: User) => u.role === 'admin').length,
-        banned: response.data.filter((u: User) => u.isBanned).length
+        total: response.data.total,
+        active: response.data.users.filter((u: User) => !u.isBanned).length,
+        admins: response.data.users.filter((u: User) => u.role === 'admin').length,
+        banned: response.data.users.filter((u: User) => u.isBanned).length
       });
+      setTotalPages(response.data.pages);
     } catch (err) {
       console.error('Failed to fetch users:', err);
       setError('Failed to fetch users. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [authLoading, token]);
+  }, [authLoading, token, page, pageSize]);
 
   useEffect(() => {
     fetchUsers();
@@ -621,6 +624,13 @@ const AdminUsers: React.FC = () => {
             ))}
           </Grid>
         )}
+
+        {/* Pagination Controls */}
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+          <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
+          <Typography mx={2}>Page {page} of {totalPages}</Typography>
+          <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+        </Box>
       </Container>
 
       {/* Snackbar */}

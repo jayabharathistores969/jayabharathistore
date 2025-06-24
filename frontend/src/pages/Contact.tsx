@@ -26,6 +26,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation } from '@tanstack/react-query';
+import config from '../config';
 
 const Contact: React.FC = () => {
   const { user } = useAuth();
@@ -47,7 +48,7 @@ const Contact: React.FC = () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      const apiUrl = process.env.REACT_APP_API_URL || config.API_URL;
       await axios.post(`${apiUrl}/contact`, form);
       setSubmitted(true);
       setForm({ name: '', email: '', message: '' });

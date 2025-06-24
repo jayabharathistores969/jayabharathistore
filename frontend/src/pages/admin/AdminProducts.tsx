@@ -78,25 +78,28 @@ const AdminProducts: React.FC = () => {
   const { token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchProducts = useCallback(async () => {
     if (authLoading || !token) {
       if (!authLoading && !token) setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/products/all');
-      setProducts(response.data);
+      const response = await api.get(`/admin/products?page=${page}&limit=${pageSize}`);
+      setProducts(response.data.products);
+      setTotalPages(response.data.pages);
     } catch (err) {
-      console.error("Failed to fetch products:", err);
+      console.error('Failed to fetch products:', err);
       setError('Failed to fetch products. Please try again later.');
     } finally {
       setLoading(false);
     }
-  }, [authLoading, token]);
+  }, [authLoading, token, page, pageSize]);
 
   useEffect(() => {
     fetchProducts();
@@ -653,6 +656,13 @@ const AdminProducts: React.FC = () => {
             ))}
           </Grid>
         )}
+
+        {/* Pagination controls */}
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+          <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
+          <Typography mx={2}>Page {page} of {totalPages}</Typography>
+          <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+        </Box>
       </Container>
 
       {/* Product Dialog */}

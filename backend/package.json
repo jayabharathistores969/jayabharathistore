@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "echo 'No build step required'",
     "dev": "cross-env NODE_ENV=development node server.js",
     "dev:win": "set NODE_ENV=development&& node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -32,6 +33,7 @@
     "winston": "^3.13.0"
   },
   "devDependencies": {
+    "@types/node": "^24.0.3",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.10"
   }

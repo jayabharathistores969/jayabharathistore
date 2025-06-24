@@ -120,114 +120,206 @@ router.get('/dashboard-stats', async (req, res) => {
 });
 
 // USERS
-// Get all users
+// Get all users (with pagination)
 router.get('/users', async (req, res) => {
-  const users = await User.find().select('-password +active');
-  // Transform users to include isBanned field for frontend compatibility
-  const transformedUsers = users.map(user => ({
-    ...user.toObject(),
-    isBanned: !user.active
-  }));
-  res.json(transformedUsers);
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments();
+    const users = await User.find().select('-password +active').skip(skip).limit(limit);
+    const transformedUsers = users.map(user => ({
+      ...user.toObject(),
+      isBanned: !user.active
+    }));
+    res.json({ users: transformedUsers, total, page, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users' });
+  }
 });
 // Delete user
 router.delete('/users/:id', async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.json({ message: 'User deleted' });
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting user' });
+  }
 });
 // Promote/demote user
 router.put('/users/:id/role', async (req, res) => {
-  const { role } = req.body;
-  if (!['user', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role' });
-  const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
-  res.json(user);
+  try {
+    const { role } = req.body;
+    if (!['user', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role' });
+    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating user role' });
+  }
 });
 // Promote user to admin
 router.put('/users/:id/promote', async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, { role: 'admin' }, { new: true }).select('+active');
-  const transformedUser = {
-    ...user.toObject(),
-    isBanned: !user.active
-  };
-  res.json({ message: 'User promoted to admin', user: transformedUser });
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { role: 'admin' }, { new: true }).select('+active');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const transformedUser = {
+      ...user.toObject(),
+      isBanned: !user.active
+    };
+    res.json({ message: 'User promoted to admin', user: transformedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Error promoting user' });
+  }
 });
 // Demote admin to user
 router.put('/users/:id/demote', async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, { role: 'user' }, { new: true }).select('+active');
-  const transformedUser = {
-    ...user.toObject(),
-    isBanned: !user.active
-  };
-  res.json({ message: 'User demoted to user', user: transformedUser });
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { role: 'user' }, { new: true }).select('+active');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const transformedUser = {
+      ...user.toObject(),
+      isBanned: !user.active
+    };
+    res.json({ message: 'User demoted to user', user: transformedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Error demoting user' });
+  }
 });
 // Ban user
 router.put('/users/:id/ban', async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, { active: false }, { new: true }).select('+active');
-  const transformedUser = {
-    ...user.toObject(),
-    isBanned: !user.active
-  };
-  res.json({ message: 'User banned', user: transformedUser });
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { active: false }, { new: true }).select('+active');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const transformedUser = {
+      ...user.toObject(),
+      isBanned: !user.active
+    };
+    res.json({ message: 'User banned', user: transformedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Error banning user' });
+  }
 });
 // Unban user
 router.put('/users/:id/unban', async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, { active: true }, { new: true }).select('+active');
-  const transformedUser = {
-    ...user.toObject(),
-    isBanned: !user.active
-  };
-  res.json({ message: 'User unbanned', user: transformedUser });
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { active: true }, { new: true }).select('+active');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const transformedUser = {
+      ...user.toObject(),
+      isBanned: !user.active
+    };
+    res.json({ message: 'User unbanned', user: transformedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Error unbanning user' });
+  }
 });
 
 // PRODUCTS
-// Get all products
+// Get all products (with pagination)
 router.get('/products', async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const total = await Product.countDocuments();
+    const products = await Product.find().skip(skip).limit(limit);
+    res.json({ products, total, page, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching products' });
+  }
 });
 // Create product
 router.post('/products', async (req, res) => {
-  const product = new Product(req.body);
-  await product.save();
-  res.status(201).json(product);
+  try {
+    const { name, description, price, category, image, stock, unit } = req.body;
+    if (!name || !description || !price || !category || !image || !stock || !unit) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    const product = new Product({ name, description, price, category, image, stock, unit });
+    await product.save();
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating product' });
+  }
 });
 // Update product
 router.put('/products/:id', async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(product);
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product' });
+  }
 });
 // Update product stock
 router.put('/products/:id/stock', async (req, res) => {
-  const { stock } = req.body;
-  const product = await Product.findByIdAndUpdate(req.params.id, { stock }, { new: true });
-  res.json(product);
+  try {
+    const { stock } = req.body;
+    if (typeof stock !== 'number') return res.status(400).json({ message: 'Stock must be a number' });
+    const product = await Product.findByIdAndUpdate(req.params.id, { stock }, { new: true });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product stock' });
+  }
 });
 // Delete product
 router.delete('/products/:id', async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Product deleted' });
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json({ message: 'Product deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting product' });
+  }
 });
 
 // ORDERS
-// Get all orders
+// Get all orders (with pagination)
 router.get('/orders', async (req, res) => {
-  const orders = await Order.find().populate('user', 'name email').populate('items.product');
-  res.json(orders);
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const total = await Order.countDocuments();
+    const orders = await Order.find().populate('user', 'name email').populate('items.product').skip(skip).limit(limit);
+    res.json({ orders, total, page, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching orders' });
+  }
 });
 // Update order status
 router.put('/orders/:id/status', async (req, res) => {
-  const { status } = req.body;
-  const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-  res.json(order);
+  try {
+    const { status } = req.body;
+    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating order status' });
+  }
 });
 // Accept/reject order
 router.put('/orders/:id/accept', async (req, res) => {
-  const order = await Order.findByIdAndUpdate(req.params.id, { status: 'accepted' }, { new: true });
-  res.json(order);
+  try {
+    const order = await Order.findByIdAndUpdate(req.params.id, { status: 'accepted' }, { new: true });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: 'Error accepting order' });
+  }
 });
 router.put('/orders/:id/reject', async (req, res) => {
-  const order = await Order.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
-  res.json(order);
+  try {
+    const order = await Order.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: 'Error rejecting order' });
+  }
 });
 
 module.exports = router; 

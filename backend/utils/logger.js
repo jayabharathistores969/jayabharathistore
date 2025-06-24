@@ -1,42 +1,36 @@
 const winston = require('winston');
-const path = require('path');
 
-// Define log format
-const logFormat = winston.format.combine(
-  winston.format.timestamp(),
-  winston.format.errors({ stack: true }),
-  winston.format.json()
-);
+const transports = [
+  new winston.transports.Console()
+];
 
-// Create logger instance
-const logger = winston.createLogger({
-  format: logFormat,
-  transports: [
-    // Error logs
-    new winston.transports.File({
-      filename: path.join('logs', 'error.log'),
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    // Combined logs
-    new winston.transports.File({
-      filename: path.join('logs', 'combined.log'),
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-  ],
-});
+// Check if we're in a serverless environment (Vercel, etc.)
+const isServerless = process.env.VERCEL || process.env.NODE_ENV === 'production';
 
-// Add console logging in development
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    ),
-  }));
+// Only add file transport in development and non-serverless environments
+if (process.env.NODE_ENV === 'development' && !isServerless) {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const logDir = 'logs';
+    
+    // Only try to create logs directory if we're not in a serverless environment
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir);
+    }
+    transports.push(
+      new winston.transports.File({ filename: path.join(logDir, 'combined.log') })
+    );
+  } catch (error) {
+    console.warn('Could not create logs directory, using console logging only:', error.message);
+  }
 }
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports
+});
 
 // Create request logger middleware
 const requestLogger = (req, res, next) => {
