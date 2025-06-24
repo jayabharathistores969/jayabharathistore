@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { config } from './config';
 
-// Force the correct backend URL - OLD BACKEND
-const API_BASE_URL = 'https://backend-6tpf572fo-yogeshs-projects-6544e7db.vercel.app/api';
+// Force the correct backend URL (latest deployment)
+const API_BASE_URL = 'https://backend-l4tfs5l2o-yogeshs-projects-6544e7db.vercel.app/api';
 
 console.log('API Base URL:', API_BASE_URL); // Debug log
 
